@@ -3,7 +3,6 @@ import cv2 as cv
 import tkinter as tk
 from tkinter import *
 from PIL import Image, ImageTk
-import time
 import threading
 import os
 import playsound
@@ -20,6 +19,9 @@ sng_thr = threading.Thread(target = play_song, args = ("music.mp3",)) #red is NO
 sng_thr.start()
 
 def display_imgs(count, label,frame):
+    #removes all widgets from the prev page
+    for widgets in frame.winfo_children():
+        widgets.destroy()
     if count == len(pictures) - 1:
         return
     if label != None:
@@ -28,8 +30,8 @@ def display_imgs(count, label,frame):
     img = ImageTk.PhotoImage(Image.open("Mogul Period/" + pictures[count]))
     #image label
     new_l = Label(frame, image = img, bg= 'black')
-    new_l.pack()
-    new_l.place(relheight=1,relwidth=1)
+    new_l.pack(side = LEFT, padx = 30)
+
     #text description
     img_des = None
     file = open("sample.json", "r")
@@ -42,7 +44,7 @@ def display_imgs(count, label,frame):
         #put at all together with dots and removing the .jpg while adding AC" / drop off the last element or any empty
         num = acc_num[0]
         for p in acc_num:
-            if p == num:
+            if p == num: #change
                 continue
             if p == " " or p == "":
                 continue
@@ -52,40 +54,21 @@ def display_imgs(count, label,frame):
         #print(num)
         if items["Accession Number"] == num:
             img_des = items
-            print(img_des)
             break
+    #print(img_des)
     ##WARNING must find way to display image on half the screen and text on the other
-    descrip = Text(frame, height=1, width=25)
-    descrip.insert(tk.END, str(img_des))
-    descrip.pack()
+    ####//fix the measurement key
+    if img_des:
+        descrip = Text(frame)
+        descrip.configure(bg='black', fg='white', font='Times 12')
+        for keys in img_des:
+            descrip.insert(tk.END, img_des[keys] + "\n\n")
+        descrip.pack(side = RIGHT)
 
     count = count + 1
     win.after(3000, display_imgs, count, new_l,frame)
 def intro(frame):
-    # title bar
-    title_l = Text(frame, height=1, width=25, borderwidth=0, pady= 5)
-    title_l.insert(tk.END, "Majnun in the Wilderness")
-    title_l.pack()
-    title_l.tag_configure("tag_name", justify='center')
-    title_l.tag_add("tag_name", "1.0", "end")
-    title_l.configure(bg='black', fg='white', font='Times 20 bold') #has padding
-
-    # adding cover image
-    global cov_img
-    img = Image.open("Mogul Period/" + "1967-47.jpg")
-    img_res = img.resize((406, 562), Image.ANTIALIAS)
-    cov_img = ImageTk.PhotoImage(img_res)
-    img_l = Label(frame, image=cov_img)
-    img_l.pack(side = tk.LEFT, padx = 50) #make padding such that it configures automatically
-
-    # collection description
-    text_l = Text(frame, height= 7, width = 80, wrap = WORD, borderwidth=0)
-    text_l.configure(bg='black', fg='white', font='Times 12')
-    txt2 = "\tThe story of Layla and Qays’s unrequited love is an allegory for the mystic’s desire for union with God. The star-crossed sweethearts meet as youths, but being from rival clans they are forbidden from marrying. As a result of their forced separation, Qays goes crazy, retreats into the desert, and becomes known as Majnun (“mad one”). This painting shows the emaciated, unkempt Majnun seated under a large tree. Sympathetic animals gather in pairs around him, while a crowd of concerned visitors approaches from the left. Majnun, meanwhile, appears otherwise preoccupied, no doubt with thoughts of his beloved."
-    text_l.insert(tk.END, txt2)
-    text_l.pack(side = tk.LEFT, padx = 15)
-    #text_b.update() #need before getting dimensions
-
+    #
     toss_l = Label()
     win.after(3000,display_imgs,0,toss_l,frame)
 def create(win):
@@ -93,8 +76,9 @@ def create(win):
     win.title("Mogul Period")
     win.configure(bg='black')
     frame = Frame(win, width=1000, height=800, bg= "black")
-    frame.pack_propagate(False) #prevents frame from resizing based on child element
+    #frame.pack_propagate(False) #prevents frame from resizing based on child element
     frame.pack()
+    frame.place(relx=.5, rely=.5, anchor = CENTER) #makes it so that even short images/text are centered
     intro(frame)
     return frame
 
