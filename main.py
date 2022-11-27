@@ -1,7 +1,7 @@
 #Naila Thevenot Fall 2022 --> main.py
-import cv2 as cv
 import tkinter as tk
 from tkinter import *
+from tkinter import filedialog
 from PIL import Image, ImageTk
 import threading
 import os
@@ -9,6 +9,7 @@ import playsound
 import json
 import re
 
+configs = []
 canvas_colour = "black"
 #creating a thread for the music
 def play_song(filename):
@@ -64,29 +65,91 @@ def display_imgs(count, label,frame):
 
     count = count + 1
     win.after(3000, display_imgs, count, new_l,frame)
+def get_configs():
+    configs.append(coll_name.get(1.0, "end-1c"))
+    configs.append(ignore_.get(1.0,"end-1c"))
+    win.after(300,create())
+    print(configs)
+def pass_path(item):
+    # Getting the folder path
+    folder = item
+    global pictures
+    pictures = os.listdir(folder)
+    pictures = sorted(pictures)
+    label = Label(frame, text = item)
+    label.grid(row = 4, column = 2)
+    print(folder)
+def get_img_path():
+    coll_dir = filedialog.askdirectory()
+    pass_path(coll_dir)
+def get_text_path():
+    file = filedialog.askopenfile(mode='r', initialdir= filedialog.askdirectory(), filetypes=[('text files', '*.txt')])
+def prompt(win):
+    #cab use grid
+    global coll_name
+    global ignore_
+    win.title("Image Projection")
+    win.configure(bg='white')
+    frame = Frame(win, width=500, height=500, bg="white")
+    frame.grid_propagate(False) #prevents frame from resizing based on child element
+    frame.pack()
+    # frame.columnconfigure(0, weight=3)
+    # frame.rowconfigure(1, weight=1)
 
-def create(win):
+    tit_label = Label(frame, text = "Image Projection", font= " Times 12 bold")
+    tit_label.grid(row = 0, column = 2, rowspan=2,columnspan=2)
+
+    #collection name
+    coll_n_l = Label(frame, text = "Collection Name")
+    coll_n_l.grid(row=3, column=1)
+
+    coll_name = Text(frame,height = 1,width = 25)
+    coll_name.grid(row=3,column=2)
+
+    #image folder
+    p_btn = Button(frame, text="Select Folder", command=get_img_path)
+    p_btn.grid(row = 4, column = 1)
+
+    #Text File path
+    p_btn = Button(frame, text="Select Description File", command=get_text_path)
+    p_btn.grid(row=5, column=1)
+
+    # #labels to ignore / need to grab input and update json loop
+    # ignore_ = Text(frame,height = 1,width = 50) #Make expandable
+    # ignore_.grid(row = 4, column = 2)
+    #
+    sub_btn = Button(frame, text= "Submit", command= get_configs)
+    sub_btn.grid(row = 6, column = 6)
+    return frame
+
+def create():
+    for child in win.winfo_children():
+        child.destroy()
+
     win.attributes('-fullscreen', True)
     win.title("Mogul Period")
     win.configure(bg='black')
-    frame = Frame(win, width=1000, height=800, bg= "black")
-    #frame.pack_propagate(False) #prevents frame from resizing based on child element
+    frame = Frame(win, width=1000, height=800, bg="black")
+    # frame.pack_propagate(False) #prevents frame from resizing based on child element
     frame.pack()
-    frame.place(relx=.5, rely=.5, anchor = CENTER) #makes it so that even short images/text are centered
-
+    frame.place(relx=.5, rely=.5, anchor=CENTER)  # makes it so that even short images/text are centered
     toss_l = Label()
-
     win.after(300, display_imgs, 0, toss_l, frame) #need to delay call because the frame is in memory after this function runs
 
-    return frame
-
 win = Tk()
-frame = create(win)
-
-# Getting the folder path
-folder = "Mogul Period"
-
-pictures = os.listdir(folder)
-pictures = sorted(pictures)
+frame = prompt(win)
 
 win.mainloop()
+
+#finish getting text path
+#add JSON conversion code as module
+#confirm logic
+#make prompt pretty
+
+
+#add different styles for how to display image + text --> 2 or 3
+#add ability to control projector
+#add support for ignoring certain labels
+#add security
+#optimize code
+#download to executable file
