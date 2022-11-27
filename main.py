@@ -55,9 +55,6 @@ def display_imgs(count, label,frame):
         if items["Accession Number"] == num:
             img_des = items
             break
-    #print(img_des)
-    ##WARNING must find way to display image on half the screen and text on the other
-    ####//fix the measurement key
     if img_des:
         descrip = Text(frame)
         descrip.configure(bg='black', fg='white', font='Times 12')
@@ -67,10 +64,7 @@ def display_imgs(count, label,frame):
 
     count = count + 1
     win.after(3000, display_imgs, count, new_l,frame)
-def intro(frame):
-    #
-    toss_l = Label()
-    win.after(3000,display_imgs,0,toss_l,frame)
+
 def create(win):
     win.attributes('-fullscreen', True)
     win.title("Mogul Period")
@@ -79,7 +73,11 @@ def create(win):
     #frame.pack_propagate(False) #prevents frame from resizing based on child element
     frame.pack()
     frame.place(relx=.5, rely=.5, anchor = CENTER) #makes it so that even short images/text are centered
-    intro(frame)
+
+    toss_l = Label()
+
+    win.after(300, display_imgs, 0, toss_l, frame) #need to delay call because the frame is in memory after this function runs
+
     return frame
 
 win = Tk()
