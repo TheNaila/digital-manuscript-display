@@ -11,6 +11,10 @@ import re
 
 configs = []
 canvas_colour = "black"
+txt_p = False
+img_p = False
+file = None
+sub_btn = False
 #creating a thread for the music
 def play_song(filename):
     playsound.playsound(filename)
@@ -23,7 +27,7 @@ def display_imgs(count, label,frame):
     #removes all widgets from the prev page
     for widgets in frame.winfo_children():
         widgets.destroy()
-    if count == len(pictures) - 1:
+    if count == len(pictures):
         return
     if label != None:
         label.destroy()
@@ -35,11 +39,12 @@ def display_imgs(count, label,frame):
 
     #text description
     img_des = None
-    file = open("sample.json", "r")
-    data = json.loads(file.read())
+    global file
+    data = json.loads(file)
 
     #gets the item from the jSON file for the corresponding image
     for items in data:
+
         #split the image name
         acc_num = re.split("-|.jpg", pictures[count])
         #put at all together with dots and removing the .jpg while adding AC" / drop off the last element or any empty
@@ -52,7 +57,6 @@ def display_imgs(count, label,frame):
             elif p != acc_num[-1]:
                 num = num + '.' + p
         num = "AC " + num
-        #print(num)
         if items["Accession Number"] == num:
             img_des = items
             break
@@ -67,23 +71,51 @@ def display_imgs(count, label,frame):
     win.after(3000, display_imgs, count, new_l,frame)
 def get_configs():
     configs.append(coll_name.get(1.0, "end-1c"))
-    configs.append(ignore_.get(1.0,"end-1c"))
+    #configs.append(ignore_.get(1.0,"end-1c"))
     win.after(300,create())
-    print(configs)
-def pass_path(item):
-    # Getting the folder path
-    folder = item
-    global pictures
-    pictures = os.listdir(folder)
-    pictures = sorted(pictures)
-    label = Label(frame, text = item)
-    label.grid(row = 4, column = 2)
-    print(folder)
+def pass_path(item, img = False):
+    #Getting the folder path
+    if img:
+        folder = item
+        global pictures
+        pictures = os.listdir(folder)
+        pictures = sorted(pictures)
+        label = Label(frame, text = item, justify= LEFT)
+        label.grid(row = 4, column = 2, columnspan= len(item))
+    else:
+        global file
+        file = open(item, "r")
+        file = file.read()
+        label = Label(frame, text=item, justify= LEFT)
+        label.grid(row=5, column=2, columnspan= len(item))
+
 def get_img_path():
     coll_dir = filedialog.askdirectory()
-    pass_path(coll_dir)
+    if os.path.getsize(coll_dir) == 0:
+        text = "This folder is empty. Please select another."
+        label = Label(frame, text=text, justify=LEFT)
+        label.grid(row=5, column=2, columnspan=len(text))
+    elif coll_dir != "":
+        pass_path(coll_dir, img= True)
+        global txt_p
+        txt_p = True
+        en_sub()
 def get_text_path():
-    file = filedialog.askopenfile(mode='r', initialdir= filedialog.askdirectory(), filetypes=[('text files', '*.txt')])
+    file = filedialog.askopenfile(mode='r', initialdir= filedialog.askdirectory(), filetypes=[('json files', '*.json')])
+    print(os.path.getsize(file.name))
+    if file != "" and file != None :
+        pass_path(file.name, img = False)
+        global img_p
+        img_p = True
+        en_sub()
+def en_sub():
+    global txt_p
+    global img_p
+
+    if img_p and txt_p:
+        global sub_btn
+        sub_btn["state"] = "active"
+
 def prompt(win):
     #cab use grid
     global coll_name
@@ -111,14 +143,15 @@ def prompt(win):
     p_btn.grid(row = 4, column = 1)
 
     #Text File path
-    p_btn = Button(frame, text="Select Description File", command=get_text_path)
-    p_btn.grid(row=5, column=1)
+    i_btn = Button(frame, text="Select Description File", command=get_text_path)
+    i_btn.grid(row=5, column=1)
 
     # #labels to ignore / need to grab input and update json loop
     # ignore_ = Text(frame,height = 1,width = 50) #Make expandable
     # ignore_.grid(row = 4, column = 2)
     #
-    sub_btn = Button(frame, text= "Submit", command= get_configs)
+    global sub_btn
+    sub_btn = Button(frame, text= "Submit", command= get_configs, state= "disabled")
     sub_btn.grid(row = 6, column = 6)
     return frame
 
@@ -141,15 +174,24 @@ frame = prompt(win)
 
 win.mainloop()
 
-#finish getting text path
+
+#enusre that args are images folders with at least one thing/ text file with at least one item
+#make text wrap length flexible
+#ensure there are images inside folder/not other files/text
+#ensure that images and text correlate
+#have a definite end/loop
 #add JSON conversion code as module
 #confirm logic
 #make prompt pretty
-
+#set music to come in properly
 
 #add different styles for how to display image + text --> 2 or 3
 #add ability to control projector
 #add support for ignoring certain labels
 #add security
+#integrate an API
 #optimize code
 #download to executable file
+
+#Done
+#stuff should only happen if everything is filled in
