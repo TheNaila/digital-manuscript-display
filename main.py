@@ -41,7 +41,6 @@ def display_imgs(count, label,frame):
     img_des = None
     global file
     data = json.loads(file)
-
     #gets the item from the jSON file for the corresponding image
     for items in data:
 
@@ -91,18 +90,26 @@ def pass_path(item, img = False):
 
 def get_img_path():
     coll_dir = filedialog.askdirectory()
-    if os.path.getsize(coll_dir) == 0:
+    if coll_dir == "":
+        text = "Please select a folder."
+        label = Label(frame, text=text, justify=LEFT)
+        label.grid(row=4, column=2, columnspan=len(text))
+    elif os.path.getsize(coll_dir) == 0:
         text = "This folder is empty. Please select another."
         label = Label(frame, text=text, justify=LEFT)
-        label.grid(row=5, column=2, columnspan=len(text))
-    elif coll_dir != "":
+        label.grid(row=4, column=2, columnspan=len(text))
+    else:
         pass_path(coll_dir, img= True)
         global txt_p
         txt_p = True
         en_sub()
 def get_text_path():
     file = filedialog.askopenfile(mode='r', initialdir= filedialog.askdirectory(), filetypes=[('json files', '*.json')])
-    print(os.path.getsize(file.name))
+    file_r = open(file.name, "r")
+    file_r = file.read()
+
+    if re.match("[\w]",file_r) == None:
+        print("Empty")
     if file != "" and file != None :
         pass_path(file.name, img = False)
         global img_p
@@ -177,6 +184,7 @@ win.mainloop()
 
 #enusre that args are images folders with at least one thing/ text file with at least one item
 #make text wrap length flexible
+#takes time to start up
 #ensure there are images inside folder/not other files/text
 #ensure that images and text correlate
 #have a definite end/loop
