@@ -1,5 +1,6 @@
 #Naila Thevenot Fall 2022 --> main.py
 import tkinter as tk
+#remove unecessary
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image, ImageTk
@@ -19,9 +20,6 @@ sub_btn = False
 def play_song(filename):
     playsound.playsound(filename)
     print("running thread")
-
-sng_thr = threading.Thread(target = play_song, args = ("music.mp3",)) #red is NOT an issue, super nitpicky about space between args
-sng_thr.start()
 
 def display_imgs(count, label,frame):
     #removes all widgets from the prev page
@@ -67,7 +65,7 @@ def display_imgs(count, label,frame):
         descrip.pack(side = RIGHT)
 
     count = count + 1
-    win.after(3000, display_imgs, count, new_l,frame)
+    win.after(10000, display_imgs, count, new_l,frame)
 def get_configs():
     configs.append(coll_name.get(1.0, "end-1c"))
     #configs.append(ignore_.get(1.0,"end-1c"))
@@ -87,9 +85,22 @@ def pass_path(item, img = False):
         file = file.read()
         label = Label(frame, text=item, justify= LEFT)
         label.grid(row=5, column=2, columnspan= len(item))
-
 def get_img_path():
     coll_dir = filedialog.askdirectory()
+    for root, dirs, files in os.walk(coll_dir):
+        print(len(files))
+        if len(files) == 0:
+            #FIXXXXXXXXXXX
+            print("There are no files in this folder")
+            # label = Label(frame, text=text, justify=LEFT)
+            # label.grid(row=4, column=2, columnspan=len(text))
+            break
+        for file in files:
+            if not file.endswith('jpg'):
+                text = "All files must be images"
+                label = Label(frame, text=text, justify=LEFT)
+                label.grid(row=4, column=2, columnspan=len(text))
+                break
     if coll_dir == "":
         text = "Please select a folder."
         label = Label(frame, text=text, justify=LEFT)
@@ -105,10 +116,10 @@ def get_img_path():
         en_sub()
 def get_text_path():
     file = filedialog.askopenfile(mode='r', initialdir= filedialog.askdirectory(), filetypes=[('json files', '*.json')])
-    file_r = open(file.name, "r")
+    file_r = open(file.name, "r") #check if string path is valid first
     file_r = file.read()
 
-    if re.match("[\w]",file_r) == None:
+    if re.match("\w",file_r) == None: #fix
         print("Empty")
     if file != "" and file != None :
         pass_path(file.name, img = False)
@@ -122,7 +133,11 @@ def en_sub():
     if img_p and txt_p:
         global sub_btn
         sub_btn["state"] = "active"
-
+def get_mc_path():
+    mc_file = filedialog.askopenfile(initialdir=filedialog.askdirectory(), filetypes=[('mp3 files', '*.mp3')])
+    file = mc_file.name.replace("/", "\\")
+    sng_thr = threading.Thread(target=play_song, args=(file,))  # red is NOT an issue, super nitpicky about space between args
+    sng_thr.start()
 def prompt(win):
     #cab use grid
     global coll_name
@@ -132,18 +147,13 @@ def prompt(win):
     frame = Frame(win, width=500, height=500, bg="white")
     frame.grid_propagate(False) #prevents frame from resizing based on child element
     frame.pack()
-    # frame.columnconfigure(0, weight=3)
-    # frame.rowconfigure(1, weight=1)
 
     tit_label = Label(frame, text = "Image Projection", font= " Times 12 bold")
     tit_label.grid(row = 0, column = 2, rowspan=2,columnspan=2)
 
-    #collection name
-    coll_n_l = Label(frame, text = "Collection Name")
-    coll_n_l.grid(row=3, column=1)
-
-    coll_name = Text(frame,height = 1,width = 25)
-    coll_name.grid(row=3,column=2)
+    #Music file
+    m_btn = Button(frame, text="Select Music File", command=get_mc_path)
+    m_btn.grid(row=3, column=1)
 
     #image folder
     p_btn = Button(frame, text="Select Folder", command=get_img_path)
@@ -153,15 +163,10 @@ def prompt(win):
     i_btn = Button(frame, text="Select Description File", command=get_text_path)
     i_btn.grid(row=5, column=1)
 
-    # #labels to ignore / need to grab input and update json loop
-    # ignore_ = Text(frame,height = 1,width = 50) #Make expandable
-    # ignore_.grid(row = 4, column = 2)
-    #
     global sub_btn
     sub_btn = Button(frame, text= "Submit", command= get_configs, state= "disabled")
     sub_btn.grid(row = 6, column = 6)
     return frame
-
 def create():
     for child in win.winfo_children():
         child.destroy()
@@ -180,11 +185,10 @@ win = Tk()
 frame = prompt(win)
 
 win.mainloop()
-
-
+#png vs jpg
 #enusre that args are images folders with at least one thing/ text file with at least one item
+#use exception handling
 #make text wrap length flexible
-#takes time to start up
 #ensure there are images inside folder/not other files/text
 #ensure that images and text correlate
 #have a definite end/loop
