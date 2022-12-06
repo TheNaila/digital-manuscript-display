@@ -19,9 +19,14 @@ sub_btn = False
 #creating a thread for the music
 def play_song(filename):
     playsound.playsound(filename)
-    print("running thread")
+    global count
+    global pictures
+    if count != len(pictures):
+        play_song(filename)
 
-def display_imgs(count, label,frame):
+def display_imgs(_count, label,frame):
+    global count
+    count = _count
     #removes all widgets from the prev page
     for widgets in frame.winfo_children():
         widgets.destroy()
@@ -65,10 +70,13 @@ def display_imgs(count, label,frame):
         descrip.pack(side = RIGHT)
 
     count = count + 1
-    win.after(10000, display_imgs, count, new_l,frame)
+    win.after(60000, display_imgs, count, new_l,frame)
 def get_configs():
-    configs.append(coll_name.get(1.0, "end-1c"))
-    #configs.append(ignore_.get(1.0,"end-1c"))
+    global mc_file
+    if mc_file!= None:
+        sng_thr = threading.Thread(target=play_song,
+                                   args=(mc_file,))  # red is NOT an issue, super nitpicky about space between args
+        sng_thr.start()
     win.after(300,create())
 def pass_path(item, img = False):
     #Getting the folder path
@@ -134,10 +142,11 @@ def en_sub():
         global sub_btn
         sub_btn["state"] = "active"
 def get_mc_path():
-    mc_file = filedialog.askopenfile(initialdir=filedialog.askdirectory(), filetypes=[('mp3 files', '*.mp3')])
-    file = mc_file.name.replace("/", "\\")
-    sng_thr = threading.Thread(target=play_song, args=(file,))  # red is NOT an issue, super nitpicky about space between args
-    sng_thr.start()
+    file = filedialog.askopenfile(initialdir=filedialog.askdirectory(), filetypes=[('mp3 files', '*.mp3')])
+    global mc_file
+    mc_file = None
+    if file != None:
+        mc_file = file.name.replace("/", "\\")
 def prompt(win):
     #cab use grid
     global coll_name
@@ -185,6 +194,9 @@ win = Tk()
 frame = prompt(win)
 
 win.mainloop()
+
+#make music loop
+#make text description optional
 #png vs jpg
 #enusre that args are images folders with at least one thing/ text file with at least one item
 #use exception handling

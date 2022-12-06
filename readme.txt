@@ -1,8 +1,8 @@
-title
+title:
 Author
 Date
 Place
-
+Github: TheNaila - https://github.com/TheNaila/interactive-art/tree/single
 Abstract :
 Manuscripts are hard to show, we now have a way to view them on a bigger screen
 Small, delicate, lots of room for display
@@ -10,10 +10,10 @@ Total images and time
 The collection
 
 Dependencies:
+Python version
 
 Sofware used:
-
-Raspberry pi:
+PyCharm Version
 
 Begining slides:
 story
