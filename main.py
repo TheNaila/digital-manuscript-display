@@ -67,13 +67,23 @@ def display_imgs(_count, label,frame):
             break
     if img_des:
         descrip = Text(frame)
-        descrip.configure(bg='black', fg='white', font='Times 12')
+        descrip.configure(bg='black', fg='white', font='Times 14', borderwidth=0)
         for keys in img_des:
-            descrip.insert(tk.END, img_des[keys] + "\n\n")
+            if keys == 'Title':
+                descrip.tag_config("Title", justify='center', font= 'Times 24 bold')
+                descrip.insert("1.0", img_des[keys] + "\n\n")
+                descrip.tag_add("Title", "1.0", '1.0 lineend')
+            else:
+                #descrip.tag_config("Text", font='Times 14')
+                descrip.insert(tk.END, img_des[keys] + "\n\n")
+                #descrip.tag_add("Text", "1.0")
+
+            #descrip.insert(tk.END, img_des[keys] + "\n\n")
+
         descrip.pack(side = RIGHT)
 
     count = count + 1
-    win.after(60000, display_imgs, count, new_l,frame)
+    win.after(3000, display_imgs, count, new_l,frame)
 def get_configs():
     global mc_file
     if mc_file!= None:
