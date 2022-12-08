@@ -5,7 +5,9 @@ Author: Naila Thevenot
 Advisor: Professor Mihaela Malita
 
 Date: Fall 2022
+
 Place: Amherst College
+
 Github: TheNaila - https://github.com/TheNaila/interactive-art/tree/single
 
 Abstract
@@ -15,16 +17,25 @@ The collection
 
 Instructions:
 Click the corresponding buttons to select the location of the images, text description for the images and music file.
+
 Run 'pip install -r requirements.txt' to install dependencies
 
 Libraries & Dependencies:
+
 Python version : 3.11
+
 tkinter
+
 PIL
+
 threading
+
 os
+
 playsound
+
 json
+
 re
 
 Sofware used:
