@@ -12,6 +12,7 @@ The collection
 
 Instructions:
 Click the corresponding buttons to select the location of the images, text description for the images and music file.
+Run 'pip install -r requirements.txt' to install dependencies
 
 Libraries & Dependencies:
 Python version : 3.11
