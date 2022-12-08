@@ -1,6 +1,9 @@
 Title: Digital Manuscript Display
+
 Author: Naila Thevenot
+
 Advisor: Professor Mihaela Malita
+
 Date: Fall 2022
 Place: Amherst College
 Github: TheNaila - https://github.com/TheNaila/interactive-art/tree/single
