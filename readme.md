@@ -1,4 +1,4 @@
-Title: Digital Manuscript Display
+Title: Digital Manuscript Display /n
 Author: Naila Thevenot
 Advisor: Professor Mihaela Malita
 Date: Fall 2022
