@@ -37,7 +37,8 @@ def display_imgs(_count, label,frame):
     if label != None:
         label.destroy()
     global img
-    img = ImageTk.PhotoImage(Image.open("Mogul Period/" + pictures[count]))
+    global folder
+    img = ImageTk.PhotoImage(Image.open(folder + "/" + pictures[count]))
     #image label
     new_l = Label(frame, image = img, bg= 'black')
     new_l.pack(side = LEFT, padx = 30)
@@ -83,6 +84,7 @@ def get_configs():
 def pass_path(item, img = False):
     #Getting the folder path
     if img:
+        global folder
         folder = item
         global pictures
         pictures = os.listdir(folder)
