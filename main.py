@@ -10,6 +10,8 @@ import playsound
 import json
 import re
 
+
+
 configs = []
 canvas_colour = "black"
 txt_p = False
@@ -195,13 +197,9 @@ frame = prompt(win)
 
 win.mainloop()
 
+#allow setting duration
 #make music loop
 #make text description optional
-#png vs jpg
-#enusre that args are images folders with at least one thing/ text file with at least one item
-#use exception handling
-#make text wrap length flexible
-#ensure there are images inside folder/not other files/text
 #ensure that images and text correlate
 #have a definite end/loop
 #add JSON conversion code as module
@@ -216,6 +214,10 @@ win.mainloop()
 #integrate an API
 #optimize code
 #download to executable file
+#png vs jpg
+#enusre that args are images folders with at least one thing/ text file with at least one item
+#use exception handling
+#ensure there are images inside folder/not other files/text
 
 #Done
 #stuff should only happen if everything is filled in
