@@ -1,33 +1,47 @@
 #Naila Thevenot Fall 2022 --> main.py
+import time
 import tkinter as tk
 #remove unecessary
 from tkinter import *
 from tkinter import filedialog
+
 from PIL import Image, ImageTk
 import threading
 import os
-import playsound
+import sounddevice as sd
 import json
 import re
+import soundfile as sf
 
-
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, ISimpleAudioVolume
 
 configs = []
 canvas_colour = "black"
+mc_file = None
 txt_p = False
 img_p = False
 file = None
 sub_btn = False
+mc_dur = None
+img_dur_each = None
+fade_dur = 10
+index_img_start_fade = None
+data = None
+fs = None
+
 #creating a thread for the music
 def play_song(filename):
-    playsound.playsound(filename)
-    global count
-    global pictures
-    if count != len(pictures):
-        play_song(filename)
+    #clean variables
+    #set min duration of images
+    print("Playing song")
+
+    global data
+    global fs
+    sd.play(data, fs, blocking=False)
+    sd.wait()
 
 def display_imgs(_count, label,frame):
-    global count
+    global count #fix
     count = _count
     #removes all widgets from the prev page
     for widgets in frame.winfo_children():
@@ -81,16 +95,54 @@ def display_imgs(_count, label,frame):
             #descrip.insert(tk.END, img_des[keys] + "\n\n")
 
         descrip.pack(side = RIGHT)
+    global index_img_start_fade
+    global img_dur_each
+    if count == index_img_start_fade:
+        change_vol()
 
     count = count + 1
-    win.after(3000, display_imgs, count, new_l,frame)
+    win.after(img_dur_each*1000, display_imgs, count, new_l,frame)
+def change_vol():
+    sessions = AudioUtilities.GetAllSessions()  # all programs running audio
+
+    for session in sessions:
+        if session.Process and session.Process.name() == "python.exe":
+            volume = session._ctl.QueryInterface(ISimpleAudioVolume)
+            current = volume.GetMasterVolume()
+            math = current / fade_dur
+            while current > 0.1:
+                volume.SetMasterVolume(current - math, None)
+                time.sleep(1)
+                print(current)
+                current = volume.GetMasterVolume()
+            # volume.SetMasterVolume(.0, None) #0 is mute
+
 def get_configs():
+    global data
+    global fs
     global mc_file
+
+    data, fs = sf.read(mc_file)
     if mc_file!= None:
         sng_thr = threading.Thread(target=play_song,
                                    args=(mc_file,))  # red is NOT an issue, super nitpicky about space between args
         sng_thr.start()
+
     win.after(300,create())
+    global pictures
+    global mc_dur
+    global img_dur_each
+    global fade_dur
+    global index_img_start_fade
+
+
+    mc_dur = int(len(data) / fs) # in seconds
+    img_dur_each = int(mc_dur / len(pictures))
+    fade_dur = 10  # seconds
+    index_img_start_fade = int((mc_dur - fade_dur) / img_dur_each)
+    print(index_img_start_fade, "index")
+
+
 def pass_path(item, img = False):
     #Getting the folder path
     if img:
@@ -110,7 +162,6 @@ def pass_path(item, img = False):
 def get_img_path():
     coll_dir = filedialog.askdirectory()
     for root, dirs, files in os.walk(coll_dir):
-        print(len(files))
         if len(files) == 0:
             #FIXXXXXXXXXXX
             print("There are no files in this folder")
@@ -137,7 +188,7 @@ def get_img_path():
         txt_p = True
         en_sub()
 def get_text_path():
-    file = filedialog.askopenfile(mode='r', initialdir= filedialog.askdirectory(), filetypes=[('json files', '*.json')])
+    file = filedialog.askopenfile(mode='r', filetypes=[('json files', '*.json')])
     file_r = open(file.name, "r") #check if string path is valid first
     file_r = file.read()
 
@@ -156,18 +207,20 @@ def en_sub():
         global sub_btn
         sub_btn["state"] = "active"
 def get_mc_path():
-    file = filedialog.askopenfile(initialdir=filedialog.askdirectory(), filetypes=[('mp3 files', '*.mp3')])
+    file = filedialog.askopenfile(filetypes=[('mp3 files', '*.mp3')])
     global mc_file
     mc_file = None
     if file != None:
         mc_file = file.name.replace("/", "\\")
+    label = Label(frame, text=mc_file, justify=LEFT)
+    label.grid(row=3, column=2, columnspan=len(mc_file))
 def prompt(win):
     #cab use grid
     global coll_name
     global ignore_
     win.title("Image Projection")
     win.configure(bg='white')
-    frame = Frame(win, width=500, height=500, bg="white")
+    frame = Frame(win, width=800, height=1000, bg="white")
     frame.grid_propagate(False) #prevents frame from resizing based on child element
     frame.pack()
 
@@ -179,7 +232,7 @@ def prompt(win):
     m_btn.grid(row=3, column=1)
 
     #image folder
-    p_btn = Button(frame, text="Select Folder", command=get_img_path)
+    p_btn = Button(frame, text="Select Image Folder", command=get_img_path)
     p_btn.grid(row = 4, column = 1)
 
     #Text File path
@@ -191,6 +244,12 @@ def prompt(win):
     sub_btn.grid(row = 6, column = 6)
     return frame
 def create():
+    sessions = AudioUtilities.GetAllSessions()  # all programs running audio
+    for session in sessions:
+        if session.Process and session.Process.name() == "python.exe":
+            volume = session._ctl.QueryInterface(ISimpleAudioVolume)
+            volume.SetMasterVolume(.5,None)
+
     for child in win.winfo_children():
         child.destroy()
 
@@ -208,28 +267,28 @@ win = Tk()
 frame = prompt(win)
 
 win.mainloop()
-
-#allow setting duration
-#make music loop
-#make text description optional
-#ensure that images and text correlate
-#have a definite end/loop
-#add JSON conversion code as module
-#confirm logic
-#make prompt pretty
-#set music to come in properly
-
-#add different styles for how to display image + text --> 2 or 3
-#add ability to control projector
-#add support for ignoring certain labels
-#add security
-#integrate an API
-#optimize code
-#download to executable file
-#png vs jpg
-#enusre that args are images folders with at least one thing/ text file with at least one item
-#use exception handling
-#ensure there are images inside folder/not other files/text
-
-#Done
-#stuff should only happen if everything is filled in
+# #
+# #allow setting duration
+# #make music loop
+# #make text description optional
+# #ensure that images and text correlate
+# #have a definite end/loop
+# #add JSON conversion code as module
+# #confirm logic
+# #make prompt pretty
+# #set music to come in properly
+#
+# #add different styles for how to display image + text --> 2 or 3
+# #add ability to control projector
+# #add support for ignoring certain labels
+# #add security
+# #integrate an API
+# #optimize code
+# #download to executable file
+# #png vs jpg
+# #enusre that args are images folders with at least one thing/ text file with at least one item
+# #use exception handling
+# #ensure there are images inside folder/not other files/text
+#
+# #Done
+# #stuff should only happen if everything is filled in
