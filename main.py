@@ -33,6 +33,12 @@ def play_song(filename):
     global data
     global fs
     sd.play(data, fs, blocking=False)
+    sessions = AudioUtilities.GetAllSessions()  # all programs running audio
+    for session in sessions:
+        print("Got here")
+        if session.Process and session.Process.name() == "python.exe":
+            volume = session._ctl.QueryInterface(ISimpleAudioVolume)
+            volume.SetMasterVolume(.5,None)
     sd.wait()
 
 def display_imgs(_count, label,frame):
@@ -137,7 +143,7 @@ def get_configs():
     index_img_start_fade = (mc_dur - fade_dur) / img_dur_each + 1
     print(index_img_start_fade, "index")
 
-def pass_path(item, img = False):
+def pass_path(label,item, img = False):
     #Getting the folder path
     if img:
         global folder
@@ -145,43 +151,38 @@ def pass_path(item, img = False):
         global pictures
         pictures = os.listdir(folder)
         pictures = sorted(pictures)
-        label = Label(frame, text = item, justify= LEFT)
-        label.grid(row = 4, column = 2, columnspan= len(item))
+        label.configure(text = item)
     else:
         global file
         file = open(item, "r")
         file = file.read()
-        label = Label(frame, text=item, justify= LEFT)
-        label.grid(row=5, column=2, columnspan= len(item))
-def get_img_path():
+        label.configure(text = item)
+def get_img_path(label):
+
     coll_dir = filedialog.askdirectory()
     for root, dirs, files in os.walk(coll_dir):
         if len(files) == 0:
             #FIXXXXXXXXXXX
-            print("There are no files in this folder")
-            # label = Label(frame, text=text, justify=LEFT)
-            # label.grid(row=4, column=2, columnspan=len(text))
+            text = "There are no files in this folder"
+            label.configure(text=text)
             break
         for file in files:
             if not file.endswith('jpg'):
                 text = "All files must be images"
-                label = Label(frame, text=text, justify=LEFT)
-                label.grid(row=4, column=2, columnspan=len(text))
+                label.configure(text=text)
                 break
     if coll_dir == "":
         text = "Please select a folder."
-        label = Label(frame, text=text, justify=LEFT)
-        label.grid(row=4, column=2, columnspan=len(text))
+        label.configure(text=text)
     elif os.path.getsize(coll_dir) == 0:
         text = "This folder is empty. Please select another."
-        label = Label(frame, text=text, justify=LEFT)
-        label.grid(row=4, column=2, columnspan=len(text))
+        label.configure(text=text)
     else:
-        pass_path(coll_dir, img= True)
+        pass_path(label,coll_dir, img= True)
         global txt_p
         txt_p = True
         en_sub()
-def get_text_path():
+def get_text_path(label):
     file = filedialog.askopenfile(mode='r', filetypes=[('json files', '*.json')])
     file_r = open(file.name, "r") #check if string path is valid first
     file_r = file.read()
@@ -189,7 +190,7 @@ def get_text_path():
     if re.match("\w",file_r) == None: #fix
         print("Empty")
     if file != "" and file != None :
-        pass_path(file.name, img = False)
+        pass_path(label, file.name, img = False)
         global img_p
         img_p = True
         en_sub()
@@ -200,14 +201,13 @@ def en_sub():
     if img_p and txt_p:
         global sub_btn
         sub_btn["state"] = "active"
-def get_mc_path():
+def get_mc_path(label):
     file = filedialog.askopenfile(filetypes=[('mp3 files', '*.mp3')])
     global mc_file
     mc_file = None
     if file != None:
         mc_file = file.name.replace("/", "\\")
-    label = Label(frame, text=mc_file, justify=LEFT)
-    label.grid(row=3, column=2, columnspan=len(mc_file))
+    label.configure(text = mc_file)
 def prompt(win):
     #cab use grid
     global coll_name
@@ -222,7 +222,7 @@ def prompt(win):
     title_label.grid(row = 0, column = 1, sticky = "W", padx = (55,0))
 
     #image folder
-    img_selection_btn = Button(frame, text="Select Image Collection", command=get_img_path, font="Times 12", width = 20,borderwidth=0, pady = 3, bg= "grey")
+    img_selection_btn = Button(frame, text="Select Image Collection", command= lambda : get_img_path(img_label), font="Times 12", width = 20,borderwidth=0, pady = 3, bg= "grey")
     img_selection_btn.grid(row = 1, column = 0, padx = (35,0), pady= (45,0), sticky= "E")
 
     img_label = Label(frame, width=50, height=1, font="Times 12", pady=5)
@@ -232,7 +232,7 @@ def prompt(win):
     notes_img_label.grid(row=2, column=0,columnspan=2,sticky = "W", padx=(30,0), pady= (0,15))
 
     #Text File path
-    txt_selection_btn = Button(frame, text="Select Text Description File",font="Times 12 ", command=get_text_path, width= 20, borderwidth=0, pady = 3, bg= "grey")
+    txt_selection_btn = Button(frame, text="Select Text Description File",font="Times 12 ", command= lambda: get_text_path(txt_label), width= 20, borderwidth=0, pady = 3, bg= "grey")
     txt_selection_btn.grid(row=3, column=0, padx = (35,0), sticky= "E")
 
     txt_label = Label(frame, width=50, font="Times 12", pady=5)
@@ -244,7 +244,7 @@ def prompt(win):
     notes_txt_label.grid(row=4, column=0, padx=(31, 0), columnspan=2, sticky="W", pady= (3,15))
 
     #Music file
-    music_selection_btn = Button(frame, text="Select Music File", command=get_mc_path, font="Times 12", width=20, borderwidth=0, pady = 3, bg= "grey")
+    music_selection_btn = Button(frame, text="Select Music File", command=lambda: get_mc_path(music_label), font="Times 12", width=20, borderwidth=0, pady = 3, bg= "grey")
     music_selection_btn.grid(row=5, column=0, padx = (35,0),sticky= "E")
 
     music_label = Label(frame, width=50, height=1, font="Times 12", pady=5)
@@ -265,12 +265,6 @@ def prompt(win):
     sub_btn.grid(row = 8, column = 1, sticky="E")
     return frame
 def create():
-    sessions = AudioUtilities.GetAllSessions()  # all programs running audio
-    for session in sessions:
-        if session.Process and session.Process.name() == "python.exe":
-            volume = session._ctl.QueryInterface(ISimpleAudioVolume)
-            volume.SetMasterVolume(.5,None)
-
     for child in win.winfo_children():
         child.destroy()
 
@@ -288,28 +282,3 @@ win = Tk()
 frame = prompt(win)
 
 win.mainloop()
-# #
-# #allow setting duration
-# #make music loop
-# #make text description optional
-# #ensure that images and text correlate
-# #have a definite end/loop
-# #add JSON conversion code as module
-# #confirm logic
-# #make prompt pretty
-# #set music to come in properly
-#
-# #add different styles for how to display image + text --> 2 or 3
-# #add ability to control projector
-# #add support for ignoring certain labels
-# #add security
-# #integrate an API
-# #optimize code
-# #download to executable file
-# #png vs jpg
-# #enusre that args are images folders with at least one thing/ text file with at least one item
-# #use exception handling
-# #ensure there are images inside folder/not other files/text
-#
-# #Done
-# #stuff should only happen if everything is filled in
