@@ -4,7 +4,6 @@ import tkinter as tk
 #remove unecessary
 from tkinter import *
 from tkinter import filedialog
-
 from PIL import Image, ImageTk
 import threading
 import os
@@ -31,17 +30,13 @@ fs = None
 
 #creating a thread for the music
 def play_song(filename):
-    #clean variables
-    #set min duration of images
-    print("Playing song")
-
     global data
     global fs
     sd.play(data, fs, blocking=False)
     sd.wait()
 
 def display_imgs(_count, label,frame):
-    global count #fix
+    global count
     count = _count
     #removes all widgets from the prev page
     for widgets in frame.winfo_children():
@@ -136,12 +131,11 @@ def get_configs():
     global index_img_start_fade
 
 
-    mc_dur = int(len(data) / fs) # in seconds
-    img_dur_each = int(mc_dur / len(pictures))
+    mc_dur = len(data) / fs  # in seconds
+    img_dur_each = mc_dur / len(pictures)
     fade_dur = 10  # seconds
-    index_img_start_fade = int((mc_dur - fade_dur) / img_dur_each)
+    index_img_start_fade = (mc_dur - fade_dur) / img_dur_each + 1
     print(index_img_start_fade, "index")
-
 
 def pass_path(item, img = False):
     #Getting the folder path
@@ -220,28 +214,55 @@ def prompt(win):
     global ignore_
     win.title("Image Projection")
     win.configure(bg='white')
-    frame = Frame(win, width=800, height=1000, bg="white")
+    frame = Frame(win, width=800, height=500, bg="black")
     frame.grid_propagate(False) #prevents frame from resizing based on child element
-    frame.pack()
+    frame.grid()
 
-    tit_label = Label(frame, text = "Image Projection", font= " Times 12 bold")
-    tit_label.grid(row = 0, column = 2, rowspan=2,columnspan=2)
-
-    #Music file
-    m_btn = Button(frame, text="Select Music File", command=get_mc_path)
-    m_btn.grid(row=3, column=1)
+    title_label = Label(frame, text = "Image Projection", font= " Times 16 bold", fg="white", bg = "black")
+    title_label.grid(row = 0, column = 1, sticky = "W", padx = (55,0))
 
     #image folder
-    p_btn = Button(frame, text="Select Image Folder", command=get_img_path)
-    p_btn.grid(row = 4, column = 1)
+    img_selection_btn = Button(frame, text="Select Image Collection", command=get_img_path, font="Times 12", width = 20,borderwidth=0, pady = 3, bg= "grey")
+    img_selection_btn.grid(row = 1, column = 0, padx = (35,0), pady= (45,0), sticky= "E")
+
+    img_label = Label(frame, width=50, height=1, font="Times 12", pady=5)
+    img_label.grid(row=1, column=1,pady=(45,0))
+
+    notes_img_label = Label(frame, height=1, font="Times 10", text = "This must be a folder and isn’t optional", fg="white", bg = "black")
+    notes_img_label.grid(row=2, column=0,columnspan=2,sticky = "W", padx=(30,0), pady= (0,15))
 
     #Text File path
-    i_btn = Button(frame, text="Select Description File", command=get_text_path)
-    i_btn.grid(row=5, column=1)
+    txt_selection_btn = Button(frame, text="Select Text Description File",font="Times 12 ", command=get_text_path, width= 20, borderwidth=0, pady = 3, bg= "grey")
+    txt_selection_btn.grid(row=3, column=0, padx = (35,0), sticky= "E")
+
+    txt_label = Label(frame, width=50, font="Times 12", pady=5)
+    txt_label.grid(row=3, column=1)
+
+    notes_txt_label = Label(frame, height=1, font="Times 10",
+                            text="This should be a JSON or .txt file where each entry corresponds to an image in the collection folder.\nEach entry must include at least a title and an Accession Number (Image ID)",
+                            pady=5, fg="white", bg = "black", wraplength=1000, justify=LEFT)
+    notes_txt_label.grid(row=4, column=0, padx=(31, 0), columnspan=2, sticky="W", pady= (3,15))
+
+    #Music file
+    music_selection_btn = Button(frame, text="Select Music File", command=get_mc_path, font="Times 12", width=20, borderwidth=0, pady = 3, bg= "grey")
+    music_selection_btn.grid(row=5, column=0, padx = (35,0),sticky= "E")
+
+    music_label = Label(frame, width=50, height=1, font="Times 12", pady=5)
+    music_label.grid(row=5, column=1)
+
+    notes_mc_label = Label(frame, height=1, font="Times 10", text="Please ensure that the music file is in MP3 format", fg="white", bg = "black")
+    notes_mc_label.grid(row=6, column=0, padx=(31, 0), columnspan=2, sticky="W", pady= (0,15))
+
+    #image duration
+    img_duration_label = Label(frame, text = "Set duration for each image (Optional)", font="Times 12 ", fg="white", bg = "black")
+    img_duration_label.grid(row = 7, column= 0, sticky="W", columnspan= 2, padx=(30,0))
+
+    img_duration = Text(frame, width= 4, height= 1)
+    img_duration.grid(row = 7, column= 1, sticky="W", padx=(50,0))
 
     global sub_btn
-    sub_btn = Button(frame, text= "Submit", command= get_configs, state= "disabled")
-    sub_btn.grid(row = 6, column = 6)
+    sub_btn = Button(frame, text= "Submit", command= get_configs, state= "disabled", width = 10, borderwidth=0, pady = 3, bg= "grey")
+    sub_btn.grid(row = 8, column = 1, sticky="E")
     return frame
 def create():
     sessions = AudioUtilities.GetAllSessions()  # all programs running audio
