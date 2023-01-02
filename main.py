@@ -27,6 +27,7 @@ fade_dur = 10
 index_img_start_fade = None
 data = None
 fs = None
+duration = None
 
 #creating a thread for the music
 def play_song(filename):
@@ -35,7 +36,6 @@ def play_song(filename):
     sd.play(data, fs, blocking=False)
     sessions = AudioUtilities.GetAllSessions()  # all programs running audio
     for session in sessions:
-        print("Got here")
         if session.Process and session.Process.name() == "python.exe":
             volume = session._ctl.QueryInterface(ISimpleAudioVolume)
             volume.SetMasterVolume(.5,None)
@@ -105,7 +105,6 @@ def display_imgs(_count, label,frame):
     win.after(img_dur_each*1000, display_imgs, count, new_l,frame)
 def change_vol():
     sessions = AudioUtilities.GetAllSessions()  # all programs running audio
-
     for session in sessions:
         if session.Process and session.Process.name() == "python.exe":
             volume = session._ctl.QueryInterface(ISimpleAudioVolume)
@@ -114,34 +113,43 @@ def change_vol():
             while current > 0.1:
                 volume.SetMasterVolume(current - math, None)
                 time.sleep(1)
-                print(current)
                 current = volume.GetMasterVolume()
             # volume.SetMasterVolume(.0, None) #0 is mute
 
-def get_configs():
+def get_configs(widget):
     global data
     global fs
     global mc_file
-
-    data, fs = sf.read(mc_file)
-    if mc_file!= None:
-        sng_thr = threading.Thread(target=play_song,
-                                   args=(mc_file,))  # red is NOT an issue, super nitpicky about space between args
-        sng_thr.start()
-
-    win.after(300,create())
     global pictures
     global mc_dur
     global img_dur_each
     global fade_dur
     global index_img_start_fade
+    global duration
+    global img_dur_each
+
+    data, fs = sf.read(mc_file)
+
+    if mc_file is not None:
+        sng_thr = threading.Thread(target=play_song,
+                                   args=(mc_file,))  # red is NOT an issue, super nitpicky about space between args
+        sng_thr.start()
 
 
-    mc_dur = len(data) / fs  # in seconds
-    img_dur_each = mc_dur / len(pictures)
-    fade_dur = 10  # seconds
-    index_img_start_fade = (mc_dur - fade_dur) / img_dur_each + 1
-    print(index_img_start_fade, "index")
+    if widget.get("1.0", "end-1c") != "":
+        mc_dur = int(len(data) / fs)
+        duration = widget.get("1.0", "end-1c")
+        img_dur_each = int(duration)
+        fade_dur = 10  # seconds
+        index_img_start_fade = int((mc_dur - fade_dur) / img_dur_each) + 1 #fix
+
+    else:
+        mc_dur = int(len(data) / fs )# in seconds
+        img_dur_each = int(mc_dur / len(pictures))
+        fade_dur = 10  # seconds
+        index_img_start_fade = int((mc_dur - fade_dur) / img_dur_each) + 1
+
+    win.after(300, create())
 
 def pass_path(label,item, img = False):
     #Getting the folder path
@@ -183,7 +191,7 @@ def get_img_path(label):
         txt_p = True
         en_sub()
 def get_text_path(label):
-    file = filedialog.askopenfile(mode='r', filetypes=[('json files', '*.json')])
+    file = filedialog.askopenfile(mode='r', filetypes=[('json files', '*.json'), ('text files', '*.txt')])
     file_r = open(file.name, "r") #check if string path is valid first
     file_r = file.read()
 
@@ -213,19 +221,19 @@ def prompt(win):
     global coll_name
     global ignore_
     win.title("Image Projection")
-    win.configure(bg='white')
+    win.configure(bg='black')
     frame = Frame(win, width=800, height=500, bg="black")
     frame.grid_propagate(False) #prevents frame from resizing based on child element
     frame.grid()
 
     title_label = Label(frame, text = "Image Projection", font= " Times 16 bold", fg="white", bg = "black")
-    title_label.grid(row = 0, column = 1, sticky = "W", padx = (55,0))
+    title_label.grid(row = 0, column = 1, sticky = "W" , padx = (95,0))
 
     #image folder
     img_selection_btn = Button(frame, text="Select Image Collection", command= lambda : get_img_path(img_label), font="Times 12", width = 20,borderwidth=0, pady = 3, bg= "grey")
     img_selection_btn.grid(row = 1, column = 0, padx = (35,0), pady= (45,0), sticky= "E")
 
-    img_label = Label(frame, width=50, height=1, font="Times 12", pady=5)
+    img_label = Label(frame, width=60, height=1, font="Times 12", pady=5)
     img_label.grid(row=1, column=1,pady=(45,0))
 
     notes_img_label = Label(frame, height=1, font="Times 10", text = "This must be a folder and isn’t optional", fg="white", bg = "black")
@@ -235,7 +243,7 @@ def prompt(win):
     txt_selection_btn = Button(frame, text="Select Text Description File",font="Times 12 ", command= lambda: get_text_path(txt_label), width= 20, borderwidth=0, pady = 3, bg= "grey")
     txt_selection_btn.grid(row=3, column=0, padx = (35,0), sticky= "E")
 
-    txt_label = Label(frame, width=50, font="Times 12", pady=5)
+    txt_label = Label(frame, width=60, font="Times 12", pady=5)
     txt_label.grid(row=3, column=1)
 
     notes_txt_label = Label(frame, height=1, font="Times 10",
@@ -247,7 +255,7 @@ def prompt(win):
     music_selection_btn = Button(frame, text="Select Music File", command=lambda: get_mc_path(music_label), font="Times 12", width=20, borderwidth=0, pady = 3, bg= "grey")
     music_selection_btn.grid(row=5, column=0, padx = (35,0),sticky= "E")
 
-    music_label = Label(frame, width=50, height=1, font="Times 12", pady=5)
+    music_label = Label(frame, width=60, height=1, font="Times 12", pady=5)
     music_label.grid(row=5, column=1)
 
     notes_mc_label = Label(frame, height=1, font="Times 10", text="Please ensure that the music file is in MP3 format", fg="white", bg = "black")
@@ -261,7 +269,7 @@ def prompt(win):
     img_duration.grid(row = 7, column= 1, sticky="W", padx=(50,0))
 
     global sub_btn
-    sub_btn = Button(frame, text= "Submit", command= get_configs, state= "disabled", width = 10, borderwidth=0, pady = 3, bg= "grey")
+    sub_btn = Button(frame, text= "Submit", command= lambda : get_configs(img_duration), state= "disabled", width = 10, borderwidth=0, pady = 3, bg= "white")
     sub_btn.grid(row = 8, column = 1, sticky="E")
     return frame
 def create():
