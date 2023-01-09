@@ -34,10 +34,11 @@ pycaw~=20220416`
 ##### Sofware used:
 PyCharm Professionals Version
 
+### Acknowledgements 
 Music from: https://www.youtube.com/watch?v=kt-2jO4s1GI
 I do not own copyrights to this music
 
 Art from Amherst College Mead Museum. 
 
-A special thanks to Miloslava Hruba, Museum Coordinator, for providing access to the collection.
+A special thanks to Miloslava Hruba, Museum Coordinator, for providing access to the collection and to Professor Malita for supporting throughout this project. 
 
