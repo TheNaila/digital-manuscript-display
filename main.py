@@ -11,7 +11,7 @@ import sounddevice as sd
 import json
 import re
 import soundfile as sf
-import conversion
+import json_conversion
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 
 provided_description_file = False
@@ -23,10 +23,8 @@ music_file = None
 music_duration = None
 img_dur_each = None
 fade_dur = 10
-index_img_start_fade = None
-json_data = None
+music_data = None
 fs = None
-duration = None
 count = 0
 img = None
 img_collection_folder = None
@@ -34,9 +32,9 @@ img_collection_folder = None
 
 # creating a thread for the music
 def play_song(filename):
-    global json_data
+    global music_data
     global fs
-    sd.play(json_data, fs, blocking=False)
+    sd.play(music_data, fs, blocking=False)
     sessions = AudioUtilities.GetAllSessions()  # all programs running audio
     for session in sessions:
         if session.Process and session.Process.name() == "python.exe":
@@ -96,13 +94,13 @@ def display_imgs(_count, label, frame):
                 description.insert(tk.END, img_description[keys] + "\n\n")
 
         description.pack(side=RIGHT)
-    global index_img_start_fade
     global img_dur_each
-    if count == index_img_start_fade:
+    if count == len(pictures):
+        time.sleep(img_dur_each - fade_dur)
         change_vol()
 
     count = count + 1
-    win.after(3000, display_imgs, count, new_l, frame)
+    win.after(img_dur_each * 1000, display_imgs, count, new_l, frame)
 
 
 def change_vol():
@@ -119,37 +117,30 @@ def change_vol():
 
 
 def submit(img_duration):
-    global json_data
+    global music_data
     global fs
     global music_file
     global pictures
     global music_duration
     global img_dur_each
     global fade_dur
-    global index_img_start_fade
-    global duration
     global img_dur_each
     global description_file
 
-    json_data, fs = sf.read(music_file)
+    music_data, fs = sf.read(music_file)
 
     if music_file is not None:
         sng_thr = threading.Thread(target=play_song, args=(music_file,))  # red is NOT an issue, super nitpicky about space between args
         sng_thr.start()
 
     if img_duration.get("1.0", "end-1c") != "":
-        music_duration = int(len(json_data) / fs)
-        duration = img_duration.get("1.0", "end-1c")
-        img_dur_each = int(duration)
-        fade_dur = 10  # seconds
-        index_img_start_fade = int((music_duration - fade_dur) / img_dur_each) + 1  # fix
-
+        music_duration = int(len(music_data) / fs)
+        img_dur_each = int(img_duration.get("1.0", "end-1c"))
     else:
-        music_duration = int(len(json_data) / fs)  # in seconds
+        music_duration = int(len(music_data) / fs)  # in seconds
         img_dur_each = int(music_duration / len(pictures))
-        fade_dur = 10  # seconds
-        index_img_start_fade = int((music_duration - fade_dur) / img_dur_each) + 1
-
+        if img_dur_each < 30:
+            img_dur_each = 30
     win.after(300, create())
 
 
@@ -190,7 +181,7 @@ def get_text_path(txt_label):
         txt_label.configure(text=description_file.name)
         split_path = os.path.splitext(description_file.name)  # splits between the description_file name and extension
         if split_path[1] == '.txt':
-            description_file = conversion.main(description_file.name)
+            description_file = json_conversion.main(description_file.name)
         global provided_description_file
         provided_description_file = True
         enable_submit()
@@ -234,21 +225,21 @@ def prompt(window):
     img_label = Label(frame, width=60, height=1, font="Times 12", pady=5)
     img_label.grid(row=1, column=1, pady=(45, 0))
 
-    notes_img_label = Label(frame, height=1, font="Times 10", text="This must be a folder and isn’t optional",
+    notes_img_label = Label(frame, height=1, font="Times 10", text="Please select the image folder. This must be a folder, even if there is only one image inside. All files inside the folder must be a PNG or JPG.",
                             fg="white", bg="black")
-    notes_img_label.grid(row=2, column=0, columnspan=2, sticky="W", padx=(30, 0), pady=(0, 15))
+    notes_img_label.grid(row=2, column=0, columnspan=2, sticky="W", padx=(32, 0), pady=(3, 15))
 
     # Text File path
-    txt_selection_btn = Button(frame, text="Select Text Description File", font="Times 12 ",
+    txt_selection_btn = Button(frame, text="Select Description File", font="Times 12 ",
                                command=lambda: get_text_path(txt_label), width=20, borderwidth=0, pady=3, bg="grey")
     txt_selection_btn.grid(row=3, column=0, padx=(35, 0), sticky="E")
 
     txt_label = Label(frame, width=60, font="Times 12", pady=5)
     txt_label.grid(row=3, column=1)
 
-    notes_txt_label = Label(frame, height=1, font="Times 10",
-                            text="This should be a JSON or .txt description_file where each entry corresponds to an image in the collection folder.\nEach entry must include at least a title and an Accession Number (Image ID)",
-                            pady=5, fg="white", bg="black", wraplength=1000, justify=LEFT)
+    notes_txt_label = Label(frame, height=3, font="Times 10",
+                            text="This should be a JSON or text file where each entry corresponds to an image in the collection folder. The order does not matter. Each entry must include at least a Title and an Accession Number (Image ID). Please select the file type in the bottom right corner of file selection window to see all acceptable files in a folder. Please don't include text you don't want to display.",
+                            pady=5, fg="white", bg="black", wraplength=730, justify=LEFT)
     notes_txt_label.grid(row=4, column=0, padx=(31, 0), columnspan=2, sticky="W", pady=(3, 15))
 
     # Music description_file
@@ -259,9 +250,9 @@ def prompt(window):
     music_label = Label(frame, width=60, height=1, font="Times 12", pady=5)
     music_label.grid(row=5, column=1)
 
-    notes_mc_label = Label(frame, height=1, font="Times 10", text="Please ensure that the music description_file is in MP3 format",
-                           fg="white", bg="black")
-    notes_mc_label.grid(row=6, column=0, padx=(31, 0), columnspan=2, sticky="W", pady=(0, 15))
+    notes_mc_label = Label(frame, height=4, font="Times 10", text="Please ensure that the music file is in MP3 format. Verify that if you set a duration, that the music will last the entirety of the projection with a 10 second fade at the end. If you are not setting a duration, the music should allow that each image be displayed for at least 30 seconds. If a duration isn't set, each image will take up an equal stretch of time as allowed by the length of the music accounting for a 10 second fage out at the end.",
+                           fg="white", bg="black", wraplength=730, justify= LEFT)
+    notes_mc_label.grid(row=6, column=0, padx=(31, 0), columnspan=2, sticky="W", pady=(3, 15))
 
     # image duration
     img_duration_label = Label(frame, text="Set duration for each image (Optional)", font="Times 12 ", fg="white",
@@ -296,13 +287,13 @@ win = Tk()
 prompt(win)
 win.mainloop()
 
-#add to instructions
-#fix img duration
+
+#fit text description
+# use event listener to make pause, start, restart, end
+#don't show accession number
 #don't allow submit button if assertions are false
 #better text format
 #test out other collections
 #Title only Option
-#Allow font setting
 #global vs passing args
-#Add security
-#Bundle as executable
+#Go over code
