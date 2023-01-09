@@ -26,7 +26,10 @@ Create a folder in terminal
 Clone this repo onto computer inside the folder 
 `git clone https://github.com/TheNaila/digital-manuscript-display`
 
-Run `pip install -r requirements.txt` to install library dependencies
+`cd digital-manuscript-display`
+
+`pip install -r requirements.txt` to install library dependencies
+(Ensure you are using Python 3.11 and its pip)
 
 Finally run `python main.py` and follow the on-screen instructions to display your collection
 
@@ -34,12 +37,12 @@ Finally run `python main.py` and follow the on-screen instructions to display yo
 
 `Python version : 3.11`
 
-`numpy==1.23.4
-Pillow==9.3.0
-tk==0.1.0
-sounddevice~=0.4.5
-soundfile~=0.11.0
-pycaw~=20220416`
+`numpy
+Pillow
+tk
+sounddevice
+soundfile
+pycaw`
 
 ##### Sofware used:
 PyCharm Professionals Version
