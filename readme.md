@@ -1,16 +1,16 @@
-Title: Digital Manuscript Display
+###### Title: Digital Manuscript Display
 
-Author: Naila Thevenot
+###### Author: Naila Thevenot
 
-Advisor: Professor Mihaela Malita
+###### Advisor: Professor Mihaela Malita
 
-Date: Fall 2022
+###### Date: Fall 2022
 
-Place: Amherst College
+###### Place: Amherst College
 
-Github: TheNaila - https://github.com/TheNaila/digital-manuscript-display
+###### Github: TheNaila - https://github.com/TheNaila/digital-manuscript-display
 
-<h3> Abstract <h3>
+### Abstract
 
 Manuscripts are hard to display because of the space required so many pieces in Amherst College's Mead Museum collection are unseen. Other works of art like the Indian manuscripts that inspired this project are to small and delicate to be displayed through traditional means. With the help of this software, we now have a way to display images of the art via projection
 The collection used for this demo is the "Mughal Period" collection gifted by Alban G. Widgery. It features 36 art pieces.
