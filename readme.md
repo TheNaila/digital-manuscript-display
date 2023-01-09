@@ -18,7 +18,9 @@ The collection used for this demo is the *"Mughal Period"* collection gifted by 
 
 ### Instructions:
 Create a folder in terminal 
+
 `mkdir my-folder`
+
 `cd my-folder`
 
 Clone this repo onto computer inside the folder 
