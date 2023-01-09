@@ -14,6 +14,8 @@ Github: TheNaila - https://github.com/TheNaila/digital-manuscript-display
 
 Manuscripts are hard to display because of the space required, because of this, many pieces in Amherst College's Mead Museum collections are unseen. Some of those works of art like the Indian manuscripts that inspired this project are too small and delicate to be displayed through traditional means for the public. With the help of this software, we now have a way to display images of the art via projection making the collections more accessible. 
 
+This program allows you to select a folder containing images that you would like to display. It requires you to select a description file where each entry corresponds to one of the images. The file type can be a text file or a JSON file. If it is a text file, it will produce a JSON file that the program can use to associate the text and the images. It also allows you to select music to be played in the background as the images move. The song fades at the end. 
+
 The collection used for this demo is the *"Mughal Period"* collection gifted by Alban G. Widgery. It features 36 art pieces of an Indian Raga Manuscript.
 
 ### Instructions:
