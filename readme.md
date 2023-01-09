@@ -18,15 +18,20 @@ The collection used for this demo is the *"Mughal Period"* collection gifted by 
 
 ### Instructions:
 
-Run `pip install -r requirements.txt` to install dependencies
+Run `pip install -r requirements.txt` to install library dependencies
 
 ##### Libraries & Dependencies:
 
 `Python version : 3.11`
 
-tkinter, PIL, threading, os, playsound, json, re
+`numpy==1.23.4
+Pillow==9.3.0
+tk==0.1.0
+sounddevice~=0.4.5
+soundfile~=0.11.0
+pycaw~=20220416`
 
-###### Sofware used:
+##### Sofware used:
 PyCharm Professionals Version
 
 Music from: https://www.youtube.com/watch?v=kt-2jO4s1GI
