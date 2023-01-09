@@ -55,3 +55,7 @@ Art from Amherst College Mead Museum.
 
 A special thanks to Miloslava Hruba, Museum Coordinator, for providing access to the collection and to Professor Malita for supporting throughout this project. 
 
+<img width="826" alt="image" src="https://user-images.githubusercontent.com/63077056/211236686-dd3929cb-de4b-4276-9f08-1eb67e3ca723.png">
+
+![image](https://user-images.githubusercontent.com/63077056/211236703-6712cd8a-de79-40c3-9d80-a4d2677aadaf.png)
+
